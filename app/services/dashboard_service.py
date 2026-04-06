@@ -8,7 +8,7 @@ distributions dicts, etc.).
 from __future__ import annotations
 
 import logging
-from datetime import datetime, timedelta
+from datetime import datetime
 from typing import Any
 
 from sqlalchemy.orm import Session
@@ -88,11 +88,15 @@ class DashboardService:
     @staticmethod
     def _monthly_disbursements(disbursed_loans: list, months: int = 6) -> list[dict]:
         """Build month-by-month disbursement chart data."""
+        from dateutil.relativedelta import relativedelta  # type: ignore
+
         now = datetime.utcnow()
+        # Anchor to the first day of the current month
+        current_month_start = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
         result = []
         for i in range(months - 1, -1, -1):
-            month_start = (now.replace(day=1) - timedelta(days=i * 30)).replace(day=1, hour=0, minute=0, second=0, microsecond=0)
-            month_end = (month_start + timedelta(days=32)).replace(day=1)
+            month_start = current_month_start - relativedelta(months=i)
+            month_end = month_start + relativedelta(months=1)
             loans_in_month = [
                 l for l in disbursed_loans
                 if l.disbursed_at and month_start <= l.disbursed_at < month_end
