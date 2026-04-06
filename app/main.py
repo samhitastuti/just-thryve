@@ -12,6 +12,9 @@ from app.routers.loans import router as loans_router
 from app.routers.consent import router as consent_router
 from app.routers.offers import router as offers_router
 from app.routers.repayment import router as repayment_router
+from app.routers.dashboard import router as dashboard_router
+from app.routers.audit_logs import router as audit_logs_router
+from app.routers.ocen import router as ocen_router
 
 settings = get_settings()
 
@@ -69,6 +72,9 @@ app.include_router(loans_router)
 app.include_router(consent_router)
 app.include_router(offers_router)
 app.include_router(repayment_router)
+app.include_router(dashboard_router)
+app.include_router(audit_logs_router)
+app.include_router(ocen_router)
 
 
 @app.get("/", tags=["health"])

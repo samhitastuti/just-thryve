@@ -22,3 +22,4 @@ class User(Base):
     loans = relationship("Loan", back_populates="borrower", foreign_keys="Loan.borrower_id", cascade="all, delete-orphan")
     offered_loans = relationship("Offer", back_populates="lender", foreign_keys="Offer.lender_id")
     consents = relationship("Consent", back_populates="user", cascade="all, delete-orphan")
+    audit_logs = relationship("AuditLog", back_populates="user", cascade="all, delete-orphan")
