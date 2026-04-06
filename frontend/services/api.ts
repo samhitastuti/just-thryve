@@ -9,11 +9,11 @@
  * `Authorization: Bearer <token>` header automatically.
  */
 
-// VITE_API_URL is injected at build time via vite.config.ts `define`.
+// API_URL is injected at build time via vite.config.ts `define`.
 // The `declare` makes TypeScript aware of this build-time global without @types/node.
 declare const process: { env: Record<string, string | undefined> } | undefined;
 const BASE_URL =
-  (typeof process !== "undefined" && process?.env?.VITE_API_URL) ||
+  (typeof process !== "undefined" && process?.env?.API_URL) ||
   "http://localhost:8000";
 
 const TOKEN_KEY = "greenflow_token";

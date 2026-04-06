@@ -53,7 +53,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setUser(null);
       });
     }
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+    // This effect is intentionally run only on mount to revalidate any token
+    // that survived a page reload. The `user` check is a snapshot guard, not
+    // a reactive dependency; eslint-disable would hide a real warning so we
+    // use an empty array and acknowledge the pattern here.
+  }, []); // mount-only: revalidates persisted JWT on initial page load
 
   const login = async (credentials: { email: string; password: string }) => {
     setAuthError(null);
