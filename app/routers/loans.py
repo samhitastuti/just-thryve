@@ -217,7 +217,8 @@ def _generate_repayment_schedule(loan: Loan, db: Session):
     from datetime import date
     from dateutil.relativedelta import relativedelta  # type: ignore
 
-    rate = float(loan.approved_rate or 0) * 100  # stored as decimal e.g. 0.12 → 12%
+    # approved_rate is stored in percentage form (e.g. 12.0 for 12% p.a.)
+    rate = float(loan.approved_rate or 0)
     principal = float(loan.approved_amount or loan.amount_requested)
     schedule_items = EMIService.generate_amortization_schedule(principal, rate, loan.tenure_months)
 

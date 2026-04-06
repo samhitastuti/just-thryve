@@ -25,6 +25,7 @@ import joblib
 logger = logging.getLogger(__name__)
 
 MODEL_VERSION = "1.0.0"
+DEFAULT_ANNUAL_RATE_PCT = 12.0  # default rate used to estimate EMI-to-revenue ratio during feature engineering
 FEATURE_NAMES = [
     "gst_revenue_3m_avg",
     "gst_revenue_growth_rate",
@@ -70,7 +71,7 @@ class MLService:
         tenure = int(features.get("tenure_months", 12))
 
         from app.services.emi_service import EMIService
-        emi = EMIService.calculate_emi(loan_amount, 12.0, tenure) if loan_amount > 0 else 0
+        emi = EMIService.calculate_emi(loan_amount, DEFAULT_ANNUAL_RATE_PCT, tenure) if loan_amount > 0 else 0
         emi_ratio = emi / avg_rev if avg_rev > 0 else 1.0
 
         return np.array(

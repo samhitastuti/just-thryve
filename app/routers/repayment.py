@@ -89,6 +89,7 @@ def pay_repayment(
 
     installment.status = "paid"
     installment.paid_on = datetime.utcnow()
+    db.flush()  # flush so the pending count query sees the updated status
 
     # Check if all installments are paid → close loan
     pending_count = (
@@ -96,7 +97,7 @@ def pay_repayment(
         .filter(RepaymentSchedule.loan_id == loan.id, RepaymentSchedule.status == "pending")
         .count()
     )
-    if pending_count == 1:  # this was the last one
+    if pending_count == 0:  # this was the last installment
         loan.status = "closed"
         loan.closed_at = datetime.utcnow()
     elif loan.status == "disbursed":
