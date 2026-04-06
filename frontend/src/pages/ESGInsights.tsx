@@ -1,0 +1,139 @@
+import { motion } from "motion/react";
+import { 
+  Leaf, 
+  Wind, 
+  Droplets, 
+  Recycle, 
+  Users, 
+  ShieldCheck,
+  ArrowUpRight,
+  TrendingUp,
+  AlertCircle
+} from "lucide-react";
+import { 
+  BarChart, 
+  Bar, 
+  XAxis, 
+  YAxis, 
+  CartesianGrid, 
+  Tooltip, 
+  ResponsiveContainer,
+  Cell
+} from "recharts";
+import { Card, Badge, Button } from "../components/UI";
+import { MOCK_ESG_METRICS } from "../data/mockData";
+import { cn } from "../lib/utils";
+
+const ESG_DETAILS = [
+  { label: "Renewable Energy", value: MOCK_ESG_METRICS.renewableEnergyPercent, icon: Wind, color: "text-indigo-primary", bg: "bg-indigo-primary/10", unit: "%" },
+  { label: "Carbon Intensity", value: MOCK_ESG_METRICS.carbonIntensity, icon: Leaf, color: "text-cyan-accent", bg: "bg-cyan-accent/10", unit: "tCO2e" },
+  { label: "Waste Recycled", value: MOCK_ESG_METRICS.wasteRecycledPercent, icon: Recycle, color: "text-indigo-primary", bg: "bg-indigo-primary/10", unit: "%" },
+  { label: "Social Impact", value: MOCK_ESG_METRICS.socialImpactScore, icon: Users, color: "text-cyan-accent", bg: "bg-cyan-accent/10", unit: "/100" },
+];
+
+const BENCHMARK_DATA = [
+  { category: "Energy", yourScore: 85, industryAvg: 45 },
+  { category: "Waste", yourScore: 65, industryAvg: 50 },
+  { category: "Social", yourScore: 88, industryAvg: 72 },
+  { category: "Governance", yourScore: 92, industryAvg: 80 },
+];
+
+export function ESGInsights() {
+  return (
+    <div className="space-y-8">
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-slate-soft">ESG Insights</h1>
+          <p className="text-slate-muted">Detailed breakdown of your environmental and social performance.</p>
+        </div>
+        <Badge variant="success" className="h-fit px-4 py-1.5 text-sm">
+          Top 5% in Industry
+        </Badge>
+      </div>
+
+      {/* ESG Grid */}
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+        {ESG_DETAILS.map((item, i) => (
+          <Card key={i} className="group hover:border-indigo-primary/30 transition-all">
+            <div className="mb-4 flex items-center justify-between">
+              <div className={cn("flex h-10 w-10 items-center justify-center rounded-xl", item.bg)}>
+                <item.icon className={cn("h-5 w-5", item.color)} />
+              </div>
+              <TrendingUp className="h-4 w-4 text-indigo-primary" />
+            </div>
+            <p className="text-sm text-slate-muted">{item.label}</p>
+            <div className="flex items-baseline gap-1">
+              <p className="text-2xl font-bold text-slate-soft">{item.value}</p>
+              <span className="text-sm text-slate-muted">{item.unit}</span>
+            </div>
+          </Card>
+        ))}
+      </div>
+
+      <div className="grid gap-6 lg:grid-cols-3">
+        {/* Industry Benchmark */}
+        <Card className="lg:col-span-2">
+          <h3 className="mb-6 text-lg font-bold text-slate-soft">Industry Benchmarking</h3>
+          <div className="h-[300px] w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={BENCHMARK_DATA} layout="vertical">
+                <CartesianGrid strokeDasharray="3 3" stroke="#ffffff05" horizontal={false} />
+                <XAxis type="number" hide />
+                <YAxis 
+                  dataKey="category" 
+                  type="category" 
+                  stroke="#94A3B8" 
+                  fontSize={12} 
+                  tickLine={false} 
+                  axisLine={false} 
+                />
+                <Tooltip 
+                  cursor={{ fill: '#ffffff05' }}
+                  contentStyle={{ backgroundColor: '#0F172A', border: '1px solid #ffffff10', borderRadius: '12px' }}
+                />
+                <Bar dataKey="yourScore" name="Your Score" fill="#6366F1" radius={[0, 4, 4, 0]} barSize={20} />
+                <Bar dataKey="industryAvg" name="Industry Average" fill="#ffffff10" radius={[0, 4, 4, 0]} barSize={20} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </Card>
+
+        {/* Improvement Suggestions */}
+        <Card>
+          <h3 className="mb-6 text-lg font-bold text-slate-soft">Improvement Areas</h3>
+          <div className="space-y-4">
+            {[
+              { title: "Waste Management", desc: "Increase recycling rate by 15% to unlock 0.2% rate discount.", impact: "High" },
+              { title: "Supply Chain", desc: "Onboard 2 more green-certified vendors.", impact: "Medium" },
+              { title: "Data Transparency", desc: "Submit quarterly ESG audit for higher trust score.", impact: "Low" },
+            ].map((item, i) => (
+              <div key={i} className="rounded-xl bg-white/5 p-4 border border-white/5 hover:border-indigo-primary/20 transition-all">
+                <div className="mb-1 flex items-center justify-between">
+                  <p className="font-semibold text-slate-soft">{item.title}</p>
+                  <Badge variant={item.impact === "High" ? "success" : "default"}>{item.impact}</Badge>
+                </div>
+                <p className="text-xs text-slate-muted">{item.desc}</p>
+              </div>
+            ))}
+          </div>
+        </Card>
+      </div>
+
+      {/* Compliance Section */}
+      <Card className="border-indigo-primary/20 bg-indigo-primary/5">
+        <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+          <div className="flex items-center gap-4">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-indigo-primary/20 text-indigo-primary">
+              <ShieldCheck className="h-7 w-7" />
+            </div>
+            <div>
+              <h3 className="text-lg font-bold text-slate-soft">Compliance Status: Verified</h3>
+              <p className="text-sm text-slate-muted">All regulatory ESG filings are up to date as of April 2026.</p>
+            </div>
+          </div>
+          <Button variant="outline" size="sm">View Certificates</Button>
+        </div>
+      </Card>
+    </div>
+  );
+}

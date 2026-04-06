@@ -1,0 +1,7 @@
+{
+  "name": "JUST THRYVE",
+  "description": "OCEN-enabled ESG lending platform for SMEs, featuring AI underwriting and premium SaaS aesthetics.",
+  "requestFramePermissions": [
+    "geolocation"
+  ]
+}
