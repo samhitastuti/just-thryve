@@ -62,7 +62,10 @@ def lender() -> SimpleNamespace:
 @pytest.fixture()
 def client(mock_db: MagicMock) -> TestClient:
     """Unauthenticated test client with a mocked DB session."""
-    app.dependency_overrides[get_db] = lambda: (yield mock_db)
+    def override_get_db():
+        yield mock_db
+
+    app.dependency_overrides[get_db] = override_get_db
     with TestClient(app, raise_server_exceptions=False) as c:
         yield c
     app.dependency_overrides.clear()
@@ -71,7 +74,10 @@ def client(mock_db: MagicMock) -> TestClient:
 @pytest.fixture()
 def borrower_client(mock_db: MagicMock, borrower: SimpleNamespace) -> TestClient:
     """Test client authenticated as a borrower."""
-    app.dependency_overrides[get_db] = lambda: (yield mock_db)
+    def override_get_db():
+        yield mock_db
+
+    app.dependency_overrides[get_db] = override_get_db
     app.dependency_overrides[get_current_user] = lambda: borrower
     with TestClient(app, raise_server_exceptions=False) as c:
         yield c
@@ -81,7 +87,10 @@ def borrower_client(mock_db: MagicMock, borrower: SimpleNamespace) -> TestClient
 @pytest.fixture()
 def lender_client(mock_db: MagicMock, lender: SimpleNamespace) -> TestClient:
     """Test client authenticated as a lender."""
-    app.dependency_overrides[get_db] = lambda: (yield mock_db)
+    def override_get_db():
+        yield mock_db
+
+    app.dependency_overrides[get_db] = override_get_db
     app.dependency_overrides[get_current_user] = lambda: lender
     with TestClient(app, raise_server_exceptions=False) as c:
         yield c
