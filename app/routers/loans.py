@@ -12,9 +12,13 @@ from app.models.business_profile import BusinessProfile
 from app.models.ml_audit_log import MLAuditLog
 from app.models.repayment_schedule import RepaymentSchedule
 from app.schemas.loan import LoanApplyRequest, LoanResponse
+from app.schemas.risk import RiskExplanationResponse, RiskFactor
 from app.services.auth_service import get_current_user, require_role
 from app.services.ml_service import MLService
 from app.services.emi_service import EMIService
+from app.services.dynamic_rate_service import DynamicRateService
+from app.services.risk_explanation_service import RiskExplanationService
+from app.services.loan_comparison_service import LoanComparisonService
 from app.config import get_settings
 
 logger = logging.getLogger(__name__)
@@ -235,3 +239,177 @@ def _generate_repayment_schedule(loan: Loan, db: Session):
             status="pending",
         )
         db.add(rs)
+
+
+# ---------------------------------------------------------------------------
+# NEW: Risk explanation endpoint
+# ---------------------------------------------------------------------------
+
+@router.get("/{loan_id}/risk-explanation", response_model=RiskExplanationResponse)
+def get_risk_explanation(
+    loan_id: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """
+    Return a natural-language explanation of why the borrower received their
+    interest rate and risk classification, including key contributing factors
+    and actionable improvement tips.
+    """
+    loan = db.query(Loan).filter(Loan.id == loan_id).first()
+    if not loan:
+        raise HTTPException(status_code=404, detail="Loan not found")
+
+    if current_user.role == "borrower" and str(loan.borrower_id) != str(current_user.id):
+        raise HTTPException(status_code=403, detail="Access denied")
+
+    if loan.risk_score is None:
+        raise HTTPException(
+            status_code=400,
+            detail="Risk score not yet computed. Submit the loan for underwriting first.",
+        )
+
+    # Retrieve SHAP values from the latest ML audit log
+    latest_audit = (
+        db.query(MLAuditLog)
+        .filter(MLAuditLog.loan_id == loan_id)
+        .order_by(MLAuditLog.created_at.desc())
+        .first()
+    )
+    shap_values = latest_audit.shap_values if latest_audit else None
+    input_features = latest_audit.input_features if latest_audit else None
+
+    # Fetch business profile for sector
+    profile = db.query(BusinessProfile).filter(BusinessProfile.user_id == loan.borrower_id).first()
+    sector = profile.sector if profile else "commerce"
+
+    # Compute dynamic rate
+    rate_breakdown = DynamicRateService.calculate_rate(
+        risk_score_0_to_1000=loan.risk_score,
+        loan_amount=float(loan.amount_requested),
+        tenure_months=loan.tenure_months,
+        sector=sector,
+    )
+
+    explanation = RiskExplanationService.build_explanation(
+        shap_values=shap_values,
+        risk_score=loan.risk_score,
+        risk_category=rate_breakdown["risk_category"],
+        interest_rate=rate_breakdown["final_rate"],
+        input_features=input_features,
+    )
+
+    return RiskExplanationResponse(
+        loan_id=loan_id,
+        summary=explanation["summary"],
+        risk_gauge=explanation["risk_gauge"],
+        risk_category=explanation["risk_category"],
+        rate_rationale=explanation["rate_rationale"],
+        interest_rate=rate_breakdown["final_rate"],
+        key_factors=[RiskFactor(**f) for f in explanation["key_factors"]],
+        improvement_tips=explanation["improvement_tips"],
+        created_at=latest_audit.created_at if latest_audit else None,
+    )
+
+
+# ---------------------------------------------------------------------------
+# NEW: Loan comparison endpoint
+# ---------------------------------------------------------------------------
+
+@router.get("/{loan_id}/comparisons")
+def get_loan_comparisons(
+    loan_id: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """
+    Compare the approved loan offer against alternative tenure/rate scenarios.
+    Returns EMI, total interest, and total cost for each scenario, plus a
+    recommendation and chart-ready summary data.
+    """
+    loan = db.query(Loan).filter(Loan.id == loan_id).first()
+    if not loan:
+        raise HTTPException(status_code=404, detail="Loan not found")
+
+    if current_user.role == "borrower" and str(loan.borrower_id) != str(current_user.id):
+        raise HTTPException(status_code=403, detail="Access denied")
+
+    # Use approved figures when available, else fall back to requested
+    principal = float(loan.approved_amount or loan.amount_requested)
+    profile = db.query(BusinessProfile).filter(BusinessProfile.user_id == loan.borrower_id).first()
+    sector = profile.sector if profile else "commerce"
+
+    if loan.approved_rate:
+        rate = float(loan.approved_rate)
+    elif loan.risk_score is not None:
+        rate_breakdown = DynamicRateService.calculate_rate(
+            risk_score_0_to_1000=loan.risk_score,
+            loan_amount=principal,
+            tenure_months=loan.tenure_months,
+            sector=sector,
+        )
+        rate = rate_breakdown["final_rate"]
+    else:
+        rate = 14.0  # default indicative rate
+
+    comparison = LoanComparisonService.compare(
+        principal=principal,
+        approved_rate=rate,
+        tenure_months=loan.tenure_months,
+        sector=sector,
+        risk_score=loan.risk_score,
+    )
+    return {"loan_id": loan_id, **comparison}
+
+
+# ---------------------------------------------------------------------------
+# NEW: Early repayment options endpoint
+# ---------------------------------------------------------------------------
+
+@router.post("/{loan_id}/early-repayment")
+def early_repayment_options(
+    loan_id: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_role("borrower")),
+):
+    """
+    Calculate interest savings from making an early lump-sum pre-payment.
+    Returns options for 10%, 25%, and 50% pre-payment with new EMI and
+    interest saved for each scenario.
+    """
+    loan = db.query(Loan).filter(Loan.id == loan_id, Loan.borrower_id == current_user.id).first()
+    if not loan:
+        raise HTTPException(status_code=404, detail="Loan not found")
+
+    if loan.status not in ("disbursed", "active"):
+        raise HTTPException(
+            status_code=400,
+            detail=f"Early repayment is only available for active loans (current status: {loan.status})",
+        )
+
+    # Count remaining installments
+    remaining_installments = (
+        db.query(RepaymentSchedule)
+        .filter(RepaymentSchedule.loan_id == loan_id, RepaymentSchedule.status == "pending")
+        .count()
+    )
+
+    if remaining_installments == 0:
+        raise HTTPException(status_code=400, detail="No pending installments found")
+
+    emi = float(loan.emi_amount or 0)
+    rate = float(loan.approved_rate or 14.0)
+    # Approximate remaining principal from remaining schedule
+    pending_schedules = (
+        db.query(RepaymentSchedule)
+        .filter(RepaymentSchedule.loan_id == loan_id, RepaymentSchedule.status == "pending")
+        .all()
+    )
+    remaining_principal = sum(float(s.principal_amount) for s in pending_schedules)
+
+    options = LoanComparisonService.early_repayment_options(
+        remaining_principal=remaining_principal,
+        current_rate=rate,
+        remaining_months=remaining_installments,
+    )
+    return {"loan_id": loan_id, **options}

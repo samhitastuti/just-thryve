@@ -38,3 +38,4 @@ class Loan(Base):
     transactions = relationship("Transaction", back_populates="loan", cascade="all, delete-orphan")
     repayment_schedules = relationship("RepaymentSchedule", back_populates="loan", cascade="all, delete-orphan")
     ml_audit_logs = relationship("MLAuditLog", back_populates="loan", cascade="all, delete-orphan")
+    risk_profile = relationship("RiskProfile", back_populates="loan", uselist=False, cascade="all, delete-orphan")

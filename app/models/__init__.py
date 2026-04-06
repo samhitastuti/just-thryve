@@ -6,6 +6,9 @@ from app.models.offer import Offer
 from app.models.transaction import Transaction
 from app.models.repayment_schedule import RepaymentSchedule
 from app.models.ml_audit_log import MLAuditLog
+from app.models.risk_profile import RiskProfile
+from app.models.audit_log import AuditLog
+from app.models.lender_network import LenderNetwork
 
 __all__ = [
     "User",
@@ -16,4 +19,7 @@ __all__ = [
     "Transaction",
     "RepaymentSchedule",
     "MLAuditLog",
+    "RiskProfile",
+    "AuditLog",
+    "LenderNetwork",
 ]
