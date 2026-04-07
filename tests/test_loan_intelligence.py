@@ -5,7 +5,7 @@
   GET /loans/{id}/transactions
 """
 import uuid
-from datetime import datetime
+from datetime import datetime, UTC
 from decimal import Decimal
 from types import SimpleNamespace
 
@@ -25,9 +25,9 @@ def _make_loan(status="disbursed", borrower_id=None, **kwargs) -> SimpleNamespac
         emi_amount=kwargs.get("emi_amount", Decimal("44424.40")),
         risk_score=kwargs.get("risk_score", 750),
         ml_decision=kwargs.get("ml_decision", "approved"),
-        created_at=datetime.utcnow(),
-        submitted_at=datetime.utcnow(),
-        disbursed_at=datetime.utcnow(),
+        created_at=datetime.now(UTC),
+        submitted_at=datetime.now(UTC),
+        disbursed_at=datetime.now(UTC),
         closed_at=None,
     )
 
@@ -42,7 +42,7 @@ def _make_audit_log(loan_id) -> SimpleNamespace:
         shap_values={"gst_revenue_3m_avg": 0.25, "renewable_energy_mix": 0.20},
         decision="approved",
         confidence=Decimal("0.8500"),
-        created_at=datetime.utcnow(),
+        created_at=datetime.now(UTC),
     )
 
 
@@ -57,8 +57,8 @@ def _make_offer(loan_id, lender_id=None, status="pending") -> SimpleNamespace:
         emi_amount=Decimal("44424.40"),
         status=status,
         accepted_at=None,
-        expires_at=datetime.utcnow(),
-        created_at=datetime.utcnow(),
+        expires_at=datetime.now(UTC),
+        created_at=datetime.now(UTC),
     )
 
 
@@ -85,7 +85,7 @@ def _make_transaction(loan_id, txn_type="disbursement") -> SimpleNamespace:
         status="success",
         reference_id="DISB-ABCD1234",
         metadata_={"note": "test"},
-        created_at=datetime.utcnow(),
+        created_at=datetime.now(UTC),
     )
 
 

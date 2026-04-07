@@ -2,7 +2,7 @@ from datetime import datetime
 from decimal import Decimal
 from typing import Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 
 class BusinessProfileCreate(BaseModel):
@@ -32,6 +32,8 @@ class BusinessProfileUpdate(BaseModel):
 
 
 class BusinessProfileResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: str
     user_id: str
     business_name: str
@@ -45,6 +47,3 @@ class BusinessProfileResponse(BaseModel):
     waste_recycled_percent: Decimal
     social_impact_score: Decimal
     created_at: datetime
-
-    class Config:
-        from_attributes = True

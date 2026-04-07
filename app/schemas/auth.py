@@ -1,6 +1,6 @@
 from datetime import datetime
 from typing import Optional
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, ConfigDict, EmailStr
 
 
 class SignupRequest(BaseModel):
@@ -24,15 +24,14 @@ class TokenResponse(BaseModel):
 
 
 class UserResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     user_id: str
     email: str
     name: str
     role: str
     kyc_verified: bool
     created_at: datetime
-
-    class Config:
-        from_attributes = True
 
 
 class ProfileUpdateRequest(BaseModel):

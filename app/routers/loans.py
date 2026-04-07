@@ -1,5 +1,5 @@
 import logging
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from typing import Any, Dict, List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
@@ -127,7 +127,7 @@ def submit_loan(
     result = ml_service.predict(features)
 
     loan.status = "submitted"
-    loan.submitted_at = datetime.utcnow()
+    loan.submitted_at = datetime.now(UTC)
     loan.risk_score = result["risk_score"]
     loan.ml_decision = result["decision"]
 
@@ -219,7 +219,7 @@ def _accept_offer(
     db.query(Offer).filter(Offer.loan_id == loan_id, Offer.id != offer_id).update({"status": "rejected"})
 
     offer.status = "accepted"
-    offer.accepted_at = datetime.utcnow()
+    offer.accepted_at = datetime.now(UTC)
     loan.status = "accepted"
     loan.approved_amount = offer.offered_amount
     loan.approved_rate = offer.interest_rate
@@ -284,7 +284,7 @@ def disburse_loan(
     # Simulate successful disbursement and generate repayment schedule
     txn.status = "success"
     loan.status = "disbursed"
-    loan.disbursed_at = datetime.utcnow()
+    loan.disbursed_at = datetime.now(UTC)
 
     _generate_repayment_schedule(loan, db)
 
@@ -302,7 +302,7 @@ def _generate_repayment_schedule(loan: Loan, db: Session):
     principal = float(loan.approved_amount or loan.amount_requested)
     schedule_items = EMIService.generate_amortization_schedule(principal, rate, loan.tenure_months)
 
-    today = loan.disbursed_at.date() if loan.disbursed_at else datetime.utcnow().date()
+    today = loan.disbursed_at.date() if loan.disbursed_at else datetime.now(UTC).date()
     for item in schedule_items:
         due = today + relativedelta(months=item["installment_number"])
         rs = RepaymentSchedule(

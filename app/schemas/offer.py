@@ -1,7 +1,7 @@
 from typing import Optional
 from decimal import Decimal
 from datetime import datetime
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 
 class OfferCreateRequest(BaseModel):
@@ -12,6 +12,8 @@ class OfferCreateRequest(BaseModel):
 
 
 class OfferResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: str
     loan_id: str
     lender_id: str
@@ -23,6 +25,3 @@ class OfferResponse(BaseModel):
     accepted_at: Optional[datetime] = None
     expires_at: datetime
     created_at: datetime
-
-    class Config:
-        from_attributes = True

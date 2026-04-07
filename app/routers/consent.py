@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, UTC
 from typing import List
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -43,7 +43,7 @@ def grant_consent(
         # Auto-simulate grant for mock flow
         artefact = AAService.simulate_grant(consent_type)
 
-        now = datetime.utcnow()
+        now = datetime.now(UTC)
         consent = Consent(
             user_id=current_user.id,
             consent_type=consent_type,
@@ -110,7 +110,7 @@ def revoke_consent(
     if consent.status == "revoked":
         raise HTTPException(status_code=400, detail="Consent is already revoked")
 
-    now = datetime.utcnow()
+    now = datetime.now(UTC)
     consent.status = "revoked"
     consent.revoked_at = now
     db.commit()

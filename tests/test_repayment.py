@@ -1,6 +1,6 @@
 """Route-level tests for /repayment endpoints."""
 import uuid
-from datetime import date, datetime
+from datetime import date, datetime, UTC
 from decimal import Decimal
 from types import SimpleNamespace
 from unittest.mock import MagicMock, call
@@ -22,9 +22,9 @@ def _make_loan(status: str = "disbursed", borrower_id=None) -> SimpleNamespace:
         emi_amount=Decimal("26648.55"),
         tenure_months=12,
         status=status,
-        created_at=datetime.utcnow(),
-        submitted_at=datetime.utcnow(),
-        disbursed_at=datetime.utcnow(),
+        created_at=datetime.now(UTC),
+        submitted_at=datetime.now(UTC),
+        disbursed_at=datetime.now(UTC),
         closed_at=None,
     )
 
@@ -39,7 +39,7 @@ def _make_schedule_item(loan_id, n: int, status: str = "pending") -> SimpleNames
         interest_amount=Decimal("3000.00"),
         emi_amount=Decimal("25648.55"),
         status=status,
-        paid_on=datetime.utcnow() if status == "paid" else None,
+        paid_on=datetime.now(UTC) if status == "paid" else None,
     )
 
 

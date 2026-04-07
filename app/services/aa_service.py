@@ -3,7 +3,7 @@ Mock Account Aggregator (AA) consent flow simulation.
 In production this would integrate with a real AA gateway (e.g. Sahamati/ONEMONEY).
 """
 import uuid
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from typing import Any
 
 
@@ -18,7 +18,7 @@ class AAService:
         return {
             "consent_handle": consent_handle,
             "redirect_url": redirect_url,
-            "expires_at": (datetime.utcnow() + timedelta(hours=24)).isoformat(),
+            "expires_at": (datetime.now(UTC) + timedelta(hours=24)).isoformat(),
         }
 
     @staticmethod
@@ -30,8 +30,8 @@ class AAService:
         artefact: dict[str, Any] = {
             "artefact_id": str(uuid.uuid4()),
             "consent_type": consent_type,
-            "granted_at": datetime.utcnow().isoformat(),
-            "valid_until": (datetime.utcnow() + timedelta(days=180)).isoformat(),
+            "granted_at": datetime.now(UTC).isoformat(),
+            "valid_until": (datetime.now(UTC) + timedelta(days=180)).isoformat(),
             "data_provider": "mock-bank/gst-portal/discom",
             "signature": "mock-digital-signature-" + str(uuid.uuid4())[:8],
         }
