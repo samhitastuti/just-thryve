@@ -12,6 +12,7 @@ from app.models.business_profile import BusinessProfile
 from app.models.ml_audit_log import MLAuditLog
 from app.models.repayment_schedule import RepaymentSchedule
 from app.schemas.loan import LoanApplyRequest, LoanResponse
+from app.schemas.offer import OfferResponse
 from app.services.auth_service import get_current_user, require_role
 from app.services.ml_service import MLService
 from app.services.emi_service import EMIService
@@ -154,7 +155,7 @@ def get_loan(
     return _loan_to_response(loan)
 
 
-@router.get("/{loan_id}/offers", response_model=List[dict])
+@router.get("/{loan_id}/offers", response_model=List[OfferResponse])
 def get_loan_offers(
     loan_id: str,
     db: Session = Depends(get_db),
@@ -172,19 +173,19 @@ def get_loan_offers(
 
     offers = db.query(Offer).filter(Offer.loan_id == loan_id).all()
     return [
-        {
-            "id": str(o.id),
-            "loan_id": str(o.loan_id),
-            "lender_id": str(o.lender_id),
-            "interest_rate": float(o.interest_rate),
-            "offered_amount": float(o.offered_amount),
-            "tenure_months": o.tenure_months,
-            "emi_amount": float(o.emi_amount),
-            "status": o.status,
-            "accepted_at": o.accepted_at.isoformat() if o.accepted_at else None,
-            "expires_at": o.expires_at.isoformat(),
-            "created_at": o.created_at.isoformat(),
-        }
+        OfferResponse(
+            id=str(o.id),
+            loan_id=str(o.loan_id),
+            lender_id=str(o.lender_id),
+            interest_rate=o.interest_rate,
+            offered_amount=o.offered_amount,
+            tenure_months=o.tenure_months,
+            emi_amount=o.emi_amount,
+            status=o.status,
+            accepted_at=o.accepted_at,
+            expires_at=o.expires_at,
+            created_at=o.created_at,
+        )
         for o in offers
     ]
 

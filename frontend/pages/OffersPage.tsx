@@ -101,6 +101,10 @@ export function OffersPage() {
     return result;
   }, [offers, sortBy, sortOrder, minAmount, maxInterestRate]);
 
+  const lowestRate = filteredAndSortedOffers.length > 0
+    ? Math.min(...filteredAndSortedOffers.map(o => Number(o.interest_rate)))
+    : null;
+
   const selectedData = offers.filter(o => selectedOffers.includes(o.id));
 
   const getBestValue = (key: keyof OfferResponse, type: 'min' | 'max') => {
@@ -267,7 +271,7 @@ export function OffersPage() {
                     isRejected && "opacity-50"
                   )}
                 >
-                  {offer.interest_rate < 10 && (
+                  {lowestRate !== null && Number(offer.interest_rate) === lowestRate && filteredAndSortedOffers.length > 1 && (
                     <div className="absolute -right-12 top-6 rotate-45 bg-indigo-primary px-12 py-1 text-[10px] font-bold text-white uppercase tracking-widest">
                       Best Rate
                     </div>
