@@ -7,7 +7,7 @@ deterministic mock responses so the full platform can be developed/tested
 without external dependencies.
 """
 import uuid
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List
 
 
@@ -68,7 +68,7 @@ class OCENSimulationService:
             "protocol_version": "3.0",
             "registered_lenders": len(_MOCK_LENDERS),
             "active_lenders": sum(1 for l in _MOCK_LENDERS if l["active"]),
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "features": [
                 "loan_discovery",
                 "consent_based_data_sharing",
@@ -126,8 +126,8 @@ class OCENSimulationService:
             "loan_id": loan_id,
             "notified_lender_count": len(notified),
             "notified_lenders": notified,
-            "broadcast_at": datetime.utcnow().isoformat(),
-            "response_deadline": (datetime.utcnow() + timedelta(hours=48)).isoformat(),
+            "broadcast_at": datetime.now(timezone.utc).isoformat(),
+            "response_deadline": (datetime.now(timezone.utc) + timedelta(hours=48)).isoformat(),
             "status": "broadcasted",
         }
 

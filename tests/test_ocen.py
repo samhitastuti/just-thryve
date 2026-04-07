@@ -1,7 +1,7 @@
 """Tests for OCEN endpoints: /ocen/network-status, /ocen/discover-lenders, /ocen/broadcast/{loan_id}."""
 import uuid
 from decimal import Decimal
-from datetime import datetime
+from datetime import datetime, timezone
 from types import SimpleNamespace
 
 import pytest
@@ -15,7 +15,7 @@ def _make_loan(status="submitted", borrower_id=None, amount=Decimal("500000.00")
         purpose="Solar installation",
         tenure_months=12,
         status=status,
-        created_at=datetime.utcnow(),
+        created_at=datetime.now(timezone.utc),
     )
 
 
