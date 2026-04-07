@@ -19,11 +19,12 @@ bearer_scheme = HTTPBearer()
 class AuthService:
     @staticmethod
     def hash_password(password: str) -> str:
-        return pwd_context.hash(password)
+        # Bcrypt has a 72-byte limit; encode then truncate to ensure compatibility
+        return pwd_context.hash(password.encode("utf-8")[:72])
 
     @staticmethod
     def verify_password(plain: str, hashed: str) -> bool:
-        return pwd_context.verify(plain, hashed)
+        return pwd_context.verify(plain.encode("utf-8")[:72], hashed)
 
     @staticmethod
     def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
