@@ -115,7 +115,7 @@ export function AuditLogs() {
 
                 <div className="mt-3 flex items-center gap-2 text-xs text-indigo-primary/60 border-t border-white/5 pt-3">
                   <ShieldCheck className="h-3 w-3" />
-                  Loan ID: {log.loan_id.slice(0, 8)}…
+                  Loan ID: {log.loan_id?.slice(0, 8) ?? 'N/A'}…
                 </div>
               </Card>
             </motion.div>

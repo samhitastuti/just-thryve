@@ -81,8 +81,9 @@ export function LoanApplication() {
   const prevStep = () => setCurrentStep(prev => Math.max(prev - 1, 1));
 
   const handleSubmit = async () => {
-    const amount = parseFloat(loanAmount.replace(/,/g, '')) || 0;
-    if (!amount) {
+    const rawAmount = loanAmount.replace(/,/g, '').trim();
+    const amount = parseFloat(rawAmount);
+    if (!rawAmount || isNaN(amount) || amount <= 0) {
       setSubmitError("Please enter a valid loan amount.");
       return;
     }

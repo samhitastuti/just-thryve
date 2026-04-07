@@ -61,15 +61,25 @@ export function ESGInsights() {
   }, []);
 
   const handleUpdate = async () => {
+    const re = parseFloat(renewableEnergy);
+    const ci = parseFloat(carbonIntensity);
+    const wr = parseFloat(wasteRecycled);
+    const si = parseFloat(socialImpact);
+
+    if (isNaN(re) || re < 0 || re > 100) { setSaveError("Renewable Energy must be between 0 and 100."); return; }
+    if (isNaN(ci) || ci < 0) { setSaveError("Carbon Intensity must be a non-negative number."); return; }
+    if (isNaN(wr) || wr < 0 || wr > 100) { setSaveError("Waste Recycled must be between 0 and 100."); return; }
+    if (isNaN(si) || si < 0 || si > 100) { setSaveError("Social Impact Score must be between 0 and 100."); return; }
+
     setSaving(true);
     setSaveError(null);
     setSaveSuccess(false);
     try {
       const updated = await esgApi.updateMetrics({
-        renewable_energy_percent: parseFloat(renewableEnergy) || 0,
-        carbon_intensity: parseFloat(carbonIntensity) || 0,
-        waste_recycled_percent: parseFloat(wasteRecycled) || 0,
-        social_impact_score: parseFloat(socialImpact) || 0,
+        renewable_energy_percent: re,
+        carbon_intensity: ci,
+        waste_recycled_percent: wr,
+        social_impact_score: si,
       });
       setMetrics(updated);
       setSaveSuccess(true);

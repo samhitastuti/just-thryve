@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
@@ -52,7 +52,7 @@ def accept_offer(
     db.query(Offer).filter(Offer.loan_id == offer.loan_id, Offer.id != offer_id).update({"status": "rejected"})
 
     offer.status = "accepted"
-    offer.accepted_at = datetime.utcnow()
+    offer.accepted_at = datetime.now(timezone.utc)
     loan.status = "accepted"
     loan.approved_amount = offer.offered_amount
     loan.approved_rate = offer.interest_rate
