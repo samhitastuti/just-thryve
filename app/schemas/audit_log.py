@@ -2,10 +2,12 @@ from datetime import datetime
 from decimal import Decimal
 from typing import Any, Dict, Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 
 class AuditLogResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True, protected_namespaces=())
+
     id: str
     loan_id: str
     model_version: str
@@ -15,6 +17,3 @@ class AuditLogResponse(BaseModel):
     decision: str
     confidence: Optional[Decimal] = None
     created_at: datetime
-
-    class Config:
-        from_attributes = True

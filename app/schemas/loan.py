@@ -1,7 +1,7 @@
 from typing import Optional
 from decimal import Decimal
 from datetime import datetime
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 
 class LoanApplyRequest(BaseModel):
@@ -11,6 +11,8 @@ class LoanApplyRequest(BaseModel):
 
 
 class LoanResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     loan_id: str
     borrower_id: str
     amount_requested: Decimal
@@ -26,6 +28,3 @@ class LoanResponse(BaseModel):
     submitted_at: Optional[datetime] = None
     disbursed_at: Optional[datetime] = None
     closed_at: Optional[datetime] = None
-
-    class Config:
-        from_attributes = True

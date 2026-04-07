@@ -1,6 +1,6 @@
 from typing import Optional, List, Any
 from datetime import datetime
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 
 class ConsentGrantRequest(BaseModel):
@@ -9,6 +9,8 @@ class ConsentGrantRequest(BaseModel):
 
 
 class ConsentResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     consent_id: str
     user_id: str
     consent_type: str
@@ -18,6 +20,3 @@ class ConsentResponse(BaseModel):
     granted_at: Optional[datetime] = None
     revoked_at: Optional[datetime] = None
     created_at: datetime
-
-    class Config:
-        from_attributes = True

@@ -1,10 +1,12 @@
 from typing import Optional
 from decimal import Decimal
 from datetime import date, datetime
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 
 class RepaymentScheduleResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: str
     loan_id: str
     installment_number: int
@@ -14,9 +16,6 @@ class RepaymentScheduleResponse(BaseModel):
     emi_amount: Decimal
     status: str
     paid_on: Optional[datetime] = None
-
-    class Config:
-        from_attributes = True
 
 
 class RepaymentPayRequest(BaseModel):

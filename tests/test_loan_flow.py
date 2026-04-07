@@ -1,7 +1,7 @@
 """Route-level tests for the loan lifecycle endpoints."""
 import uuid
 from decimal import Decimal
-from datetime import datetime
+from datetime import datetime, UTC
 from types import SimpleNamespace
 from unittest.mock import MagicMock
 
@@ -26,7 +26,7 @@ def _make_loan(status: str = "created", **kwargs) -> SimpleNamespace:
         emi_amount=kwargs.get("emi_amount"),
         risk_score=kwargs.get("risk_score"),
         ml_decision=kwargs.get("ml_decision"),
-        created_at=datetime.utcnow(),
+        created_at=datetime.now(UTC),
         submitted_at=kwargs.get("submitted_at"),
         disbursed_at=kwargs.get("disbursed_at"),
         closed_at=kwargs.get("closed_at"),
@@ -44,8 +44,8 @@ def _make_offer(loan_id, lender_id, status: str = "pending") -> SimpleNamespace:
         emi_amount=Decimal("44424.40"),
         status=status,
         accepted_at=None,
-        expires_at=datetime.utcnow(),
-        created_at=datetime.utcnow(),
+        expires_at=datetime.now(UTC),
+        created_at=datetime.now(UTC),
     )
 
 

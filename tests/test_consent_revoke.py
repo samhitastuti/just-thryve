@@ -1,6 +1,6 @@
 """Tests for POST /consent/{id}/revoke endpoint."""
 import uuid
-from datetime import datetime
+from datetime import datetime, UTC
 from types import SimpleNamespace
 
 import pytest
@@ -13,9 +13,9 @@ def _make_consent(user_id, status: str = "granted") -> SimpleNamespace:
         consent_type="bank_statement",
         status=status,
         metadata_={"artefact_id": str(uuid.uuid4())},
-        granted_at=datetime.utcnow(),
+        granted_at=datetime.now(UTC),
         revoked_at=None,
-        created_at=datetime.utcnow(),
+        created_at=datetime.now(UTC),
     )
 
 
@@ -33,7 +33,7 @@ class TestRevokeConsent:
 
     def test_revoke_already_revoked_returns_400(self, borrower_client, mock_db, borrower):
         consent = _make_consent(borrower.id, status="revoked")
-        consent.revoked_at = datetime.utcnow()
+        consent.revoked_at = datetime.now(UTC)
         mock_db.query.return_value.filter.return_value.first.return_value = consent
 
         response = borrower_client.post(f"/consent/{consent.id}/revoke")

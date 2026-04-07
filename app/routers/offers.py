@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta, UTC
 from typing import List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
@@ -110,7 +110,7 @@ def create_offer(
         tenure_months=payload.tenure_months,
         emi_amount=emi,
         status="pending",
-        expires_at=datetime.utcnow() + timedelta(days=7),
+        expires_at=datetime.now(UTC) + timedelta(days=7),
     )
     db.add(offer)
 

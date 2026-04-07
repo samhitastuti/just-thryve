@@ -1,5 +1,6 @@
 """Tests for POST /auth/kyc/verify endpoint."""
 import uuid
+from datetime import datetime, UTC
 from types import SimpleNamespace
 
 import pytest
@@ -21,7 +22,7 @@ class TestKYCVerify:
 
     def test_unverified_user_can_verify_kyc(self, borrower_client, mock_db, borrower):
         # borrower fixture has kyc_verified=False
-        borrower.created_at = __import__("datetime").datetime.utcnow()
+        borrower.created_at = datetime.now(UTC)
         mock_db.refresh.side_effect = lambda obj: setattr(obj, "kyc_verified", True)
 
         response = borrower_client.post(self.URL)
@@ -32,14 +33,14 @@ class TestKYCVerify:
 
     def test_already_verified_returns_400(self, borrower_client, mock_db, borrower):
         borrower.kyc_verified = True
-        borrower.created_at = __import__("datetime").datetime.utcnow()
+        borrower.created_at = datetime.now(UTC)
 
         response = borrower_client.post(self.URL)
         assert response.status_code == 400
 
     def test_lender_can_also_verify_kyc(self, lender_client, mock_db, lender):
         lender.kyc_verified = False
-        lender.created_at = __import__("datetime").datetime.utcnow()
+        lender.created_at = datetime.now(UTC)
         mock_db.refresh.side_effect = lambda obj: setattr(obj, "kyc_verified", True)
 
         response = lender_client.post(self.URL)

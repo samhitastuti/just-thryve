@@ -1,6 +1,6 @@
 """Tests for the ML service predictions and audit log creation during loan submission."""
 import uuid
-from datetime import datetime
+from datetime import datetime, UTC
 from decimal import Decimal
 from types import SimpleNamespace
 from unittest.mock import MagicMock
@@ -24,7 +24,7 @@ def _make_loan(borrower_id=None, status: str = "created") -> SimpleNamespace:
         status=status,
         risk_score=None,
         ml_decision=None,
-        created_at=datetime.utcnow(),
+        created_at=datetime.now(UTC),
         submitted_at=None,
         disbursed_at=None,
         closed_at=None,

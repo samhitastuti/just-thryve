@@ -1,6 +1,6 @@
 """Route-level tests for /consent endpoints."""
 import uuid
-from datetime import datetime
+from datetime import datetime, UTC
 from types import SimpleNamespace
 
 import pytest
@@ -26,9 +26,9 @@ def _make_consent(user_id, consent_type: str = "bank_statement", status: str = "
         status=status,
         redirect_url=None,
         metadata_={"artefact_id": str(uuid.uuid4())},
-        granted_at=datetime.utcnow(),
+        granted_at=datetime.now(UTC),
         revoked_at=None,
-        created_at=datetime.utcnow(),
+        created_at=datetime.now(UTC),
     )
 
 
@@ -149,7 +149,7 @@ class TestGetConsentStatus:
 
     def test_get_revoked_consent_status(self, borrower_client, mock_db, borrower):
         consent = _make_consent(borrower.id, status="revoked")
-        consent.revoked_at = datetime.utcnow()
+        consent.revoked_at = datetime.now(UTC)
         mock_db.query.return_value.filter.return_value.first.return_value = consent
 
         response = borrower_client.get(f"/consent/{consent.id}/status")

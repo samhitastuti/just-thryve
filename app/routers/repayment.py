@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, UTC
 from typing import List
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
@@ -88,7 +88,7 @@ def pay_repayment(
     db.add(txn)
 
     installment.status = "paid"
-    installment.paid_on = datetime.utcnow()
+    installment.paid_on = datetime.now(UTC)
     db.flush()  # flush so the pending count query sees the updated status
 
     # Check if all installments are paid → close loan
@@ -99,7 +99,7 @@ def pay_repayment(
     )
     if pending_count == 0:  # this was the last installment
         loan.status = "closed"
-        loan.closed_at = datetime.utcnow()
+        loan.closed_at = datetime.now(UTC)
     elif loan.status == "disbursed":
         loan.status = "active"
 

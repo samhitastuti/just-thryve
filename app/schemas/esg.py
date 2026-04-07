@@ -1,17 +1,16 @@
 from typing import Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class ESGMetricsResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     renewable_energy_percent: float
     carbon_intensity: float
     compliance_score: int
     waste_recycled_percent: float
     social_impact_score: float
-
-    class Config:
-        from_attributes = True
 
 
 class ESGMetricsUpdate(BaseModel):
